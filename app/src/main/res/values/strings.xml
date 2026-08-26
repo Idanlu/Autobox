@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Autobox</string>
+    <string name="channel_sniper_name">Autobox Booking Sniper</string>
+    <string name="channel_sniper_desc">Real-time alerts for booking countdowns and sniping execution</string>
+    <string name="channel_sync_name">Schedule Sync</string>
+    <string name="channel_sync_desc">Background schedule updates and alarm scheduling alerts</string>
+</resources>
