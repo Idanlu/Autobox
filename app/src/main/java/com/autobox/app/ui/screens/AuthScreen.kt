@@ -1,6 +1,7 @@
 package com.autobox.app.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +18,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
+import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -36,10 +37,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,6 +58,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.autobox.app.ui.theme.DarkBorder
 import com.autobox.app.ui.theme.DarkSurface
 import com.autobox.app.ui.theme.DarkSurfaceVariant
@@ -70,9 +78,15 @@ fun AuthScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    var loginModeTab by remember { mutableIntStateOf(0) } // 0: Email/Pass, 1: Direct Token
     var emailInput by remember { mutableStateOf(state.email) }
     var passwordInput by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    // Direct Token fields
+    var tokenInput by remember { mutableStateOf("") }
+    var boxIdInput by remember { mutableStateOf(if (state.boxId > 0) state.boxId.toString() else "") }
+    var membershipIdInput by remember { mutableStateOf(if (state.membershipId > 0) state.membershipId.toString() else "") }
 
     Column(
         modifier = modifier
@@ -85,19 +99,19 @@ fun AuthScreen(
         // App Logo & Title
         Box(
             modifier = Modifier
-                .size(72.dp)
-                .background(OrangePrimary, shape = RoundedCornerShape(18.dp)),
+                .size(68.dp)
+                .background(OrangePrimary, shape = RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Bolt,
                 contentDescription = null,
                 tint = Color.Black,
-                modifier = Modifier.size(44.dp)
+                modifier = Modifier.size(40.dp)
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         Text(
             text = "AUTOBOX",
@@ -106,12 +120,12 @@ fun AuthScreen(
             fontWeight = FontWeight.Black
         )
         Text(
-            text = "High-Precision Arbox Auto-Scheduler",
+            text = "Arbox Auto-Scheduler & Precision Sniper",
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (state.isLoggedIn) {
             // Logged in User Profile Card
@@ -140,8 +154,8 @@ fun AuthScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    ProfileRow(label = "User", value = state.userName ?: state.email)
-                    ProfileRow(label = "Membership", value = state.membershipName ?: "Active Plan (ID: ${state.membershipId})")
+                    ProfileRow(label = "User", value = state.userName ?: state.email.ifBlank { "Connected Member" })
+                    ProfileRow(label = "Membership", value = state.membershipName ?: "Active (ID: ${state.membershipId})")
                     ProfileRow(label = "Gym Box ID", value = state.boxId.toString())
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -167,106 +181,221 @@ fun AuthScreen(
                 }
             }
         } else {
-            // Login Form
+            // Login Card with Tabs
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = DarkSurface),
                 shape = RoundedCornerShape(16.dp),
                 border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = "Arbox Credentials",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = TextPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Stored exclusively in Android EncryptedSharedPreferences on your device.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextMuted
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    OutlinedTextField(
-                        value = emailInput,
-                        onValueChange = { emailInput = it },
-                        label = { Text("Arbox Email") },
-                        leadingIcon = { Icon(Icons.Default.Mail, contentDescription = null, tint = TextMuted) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = OrangePrimary,
-                            unfocusedBorderColor = DarkBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            focusedLabelColor = OrangePrimary,
-                            unfocusedLabelColor = TextMuted
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedTextField(
-                        value = passwordInput,
-                        onValueChange = { passwordInput = it },
-                        label = { Text("Password") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = TextMuted) },
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = null,
-                                    tint = TextMuted
-                                )
-                            }
+                Column(modifier = Modifier.padding(18.dp)) {
+                    // Mode Tabs
+                    TabRow(
+                        selectedTabIndex = loginModeTab,
+                        containerColor = DarkSurfaceVariant,
+                        contentColor = OrangePrimary,
+                        indicator = { tabPositions ->
+                            TabRowDefaults.SecondaryIndicator(
+                                Modifier.tabIndicatorOffset(tabPositions[loginModeTab]),
+                                color = OrangePrimary
+                            )
                         },
-                        singleLine = true,
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = OrangePrimary,
-                            unfocusedBorderColor = DarkBorder,
-                            focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary,
-                            focusedLabelColor = OrangePrimary,
-                            unfocusedLabelColor = TextMuted
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp)
-                    )
-
-                    if (state.errorMessage != null) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = state.errorMessage ?: "",
-                            color = StatusRed,
-                            style = MaterialTheme.typography.bodyMedium
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    ) {
+                        Tab(
+                            selected = loginModeTab == 0,
+                            onClick = { loginModeTab = 0; viewModel.clearError() },
+                            text = { Text("Arbox Account", fontWeight = FontWeight.SemiBold, fontSize = 13.sp) }
+                        )
+                        Tab(
+                            selected = loginModeTab == 1,
+                            onClick = { loginModeTab = 1; viewModel.clearError() },
+                            text = { Text("Direct Token", fontWeight = FontWeight.SemiBold, fontSize = 13.sp) }
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    if (loginModeTab == 0) {
+                        // Standard Email & Password
+                        OutlinedTextField(
+                            value = emailInput,
+                            onValueChange = { emailInput = it; viewModel.clearError() },
+                            label = { Text("Arbox Email") },
+                            leadingIcon = { Icon(Icons.Default.Mail, contentDescription = null, tint = TextMuted) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = OrangePrimary,
+                                unfocusedBorderColor = DarkBorder,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedLabelColor = OrangePrimary,
+                                unfocusedLabelColor = TextMuted
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        )
 
-                    Button(
-                        onClick = { viewModel.login(emailInput, passwordInput) },
-                        enabled = !state.isLoading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = OrangePrimary,
-                            contentColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        if (state.isLoading) {
-                            CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(24.dp))
-                        } else {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = passwordInput,
+                            onValueChange = { passwordInput = it; viewModel.clearError() },
+                            label = { Text("Password") },
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = TextMuted) },
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                        contentDescription = null,
+                                        tint = TextMuted
+                                    )
+                                }
+                            },
+                            singleLine = true,
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = OrangePrimary,
+                                unfocusedBorderColor = DarkBorder,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedLabelColor = OrangePrimary,
+                                unfocusedLabelColor = TextMuted
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+
+                        if (state.errorMessage != null) {
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "Authenticate & Connect",
+                                text = state.errorMessage ?: "",
+                                color = StatusRed,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Button(
+                            onClick = { viewModel.login(emailInput, passwordInput) },
+                            enabled = !state.isLoading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = OrangePrimary,
+                                contentColor = Color.Black
+                            ),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            if (state.isLoading) {
+                                CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(22.dp))
+                            } else {
+                                Text(
+                                    text = "Log In",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    } else {
+                        // Direct Token & IDs Mode
+                        Text(
+                            text = "Paste your Bearer token and IDs from Arbox web/app session.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TextMuted
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = tokenInput,
+                            onValueChange = { tokenInput = it; viewModel.clearError() },
+                            label = { Text("Bearer Token / JWT") },
+                            leadingIcon = { Icon(Icons.Default.Key, contentDescription = null, tint = TextMuted) },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = OrangePrimary,
+                                unfocusedBorderColor = DarkBorder,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedLabelColor = OrangePrimary,
+                                unfocusedLabelColor = TextMuted
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = boxIdInput,
+                                onValueChange = { boxIdInput = it.filter { c -> c.isDigit() } },
+                                label = { Text("Box ID") },
+                                leadingIcon = { Icon(Icons.Default.Numbers, contentDescription = null, tint = TextMuted) },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = OrangePrimary,
+                                    unfocusedBorderColor = DarkBorder,
+                                    focusedTextColor = TextPrimary,
+                                    unfocusedTextColor = TextPrimary
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            )
+
+                            OutlinedTextField(
+                                value = membershipIdInput,
+                                onValueChange = { membershipIdInput = it.filter { c -> c.isDigit() } },
+                                label = { Text("Membership ID") },
+                                leadingIcon = { Icon(Icons.Default.Numbers, contentDescription = null, tint = TextMuted) },
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = OrangePrimary,
+                                    unfocusedBorderColor = DarkBorder,
+                                    focusedTextColor = TextPrimary,
+                                    unfocusedTextColor = TextPrimary
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                        }
+
+                        if (state.errorMessage != null) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = state.errorMessage ?: "",
+                                color = StatusRed,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Button(
+                            onClick = {
+                                val bId = boxIdInput.toLongOrNull() ?: 0L
+                                val mId = membershipIdInput.toLongOrNull() ?: 0L
+                                viewModel.saveDirectSession(token = tokenInput, boxId = bId, membershipId = mId)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = OrangePrimary,
+                                contentColor = Color.Black
+                            ),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Text(
+                                text = "Save & Connect Session",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold
                             )

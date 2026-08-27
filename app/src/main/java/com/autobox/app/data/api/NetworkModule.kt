@@ -14,9 +14,9 @@ object NetworkModule {
     private val headerInterceptor = Interceptor { chain ->
         val original = chain.request()
         val requestBuilder = original.newBuilder()
-            .header("Accept", "application/json")
+            .header("Accept", "application/json, text/plain, */*")
             .header("Content-Type", "application/json")
-            .header("User-Agent", "Autobox-Android/1.0 (Linux; Android; Mobile)")
+            .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36")
         val request = requestBuilder.build()
         chain.proceed(request)
     }
@@ -29,10 +29,9 @@ object NetworkModule {
         OkHttpClient.Builder()
             .addInterceptor(headerInterceptor)
             .addInterceptor(loggingInterceptor)
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
-            // Low latency tuning for HTTP/2 connection pooling
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build()
     }

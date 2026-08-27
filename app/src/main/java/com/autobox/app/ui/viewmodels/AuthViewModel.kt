@@ -68,6 +68,31 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun saveDirectSession(token: String, boxId: Long, membershipId: Long, email: String = "") {
+        if (token.isBlank() || boxId <= 0 || membershipId <= 0) {
+            _uiState.value = _uiState.value.copy(errorMessage = "Please enter valid Token, Box ID, and Membership ID")
+            return
+        }
+
+        authRepo.saveDirectSession(
+            token = token,
+            boxId = boxId,
+            membershipId = membershipId,
+            email = email
+        )
+
+        _uiState.value = AuthUiState(
+            isLoading = false,
+            isLoggedIn = true,
+            email = prefs.email ?: "",
+            userName = prefs.userName,
+            membershipName = prefs.membershipName,
+            membershipId = prefs.membershipId,
+            boxId = prefs.boxId,
+            errorMessage = null
+        )
+    }
+
     fun logout() {
         authRepo.logout()
         _uiState.value = AuthUiState(isLoggedIn = false)

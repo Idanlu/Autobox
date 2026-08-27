@@ -11,37 +11,60 @@ import java.util.UUID
 
 data class LoginRequest(
     @SerializedName("email") val email: String,
+    @SerializedName("username") val username: String? = null,
     @SerializedName("password") val password: String
 )
 
 data class LoginResponse(
-    @SerializedName("status") val status: Boolean? = null,
+    @SerializedName("status") val status: Any? = null,
     @SerializedName("token") val token: String? = null,
+    @SerializedName("jwt") val jwt: String? = null,
+    @SerializedName("access_token") val accessToken: String? = null,
     @SerializedName("data") val data: UserData? = null,
     @SerializedName("error") val error: String? = null,
-    @SerializedName("message") val message: String? = null
+    @SerializedName("errorCode") val errorCode: Int? = null,
+    @SerializedName("error_code") val errorCodeSnake: Int? = null,
+    @SerializedName("message") val message: String? = null,
+    @SerializedName("description") val description: String? = null
 )
 
 data class UserData(
     @SerializedName("id") val id: Long? = null,
+    @SerializedName("user_id") val userId: Long? = null,
+    @SerializedName("token") val token: String? = null,
+    @SerializedName("jwt") val jwt: String? = null,
+    @SerializedName("access_token") val accessToken: String? = null,
     @SerializedName("name") val name: String? = null,
+    @SerializedName("first_name") val firstName: String? = null,
+    @SerializedName("last_name") val lastName: String? = null,
     @SerializedName("email") val email: String? = null,
     @SerializedName("phone") val phone: String? = null,
+    @SerializedName("box_id") val boxId: Long? = null,
     @SerializedName("boxes") val boxes: List<BoxInfo>? = null,
+    @SerializedName("memberships") val memberships: List<MembershipInfo>? = null,
+    @SerializedName("user") val user: UserNestedDto? = null
+)
+
+data class UserNestedDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("token") val token: String? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("email") val email: String? = null,
+    @SerializedName("box_id") val boxId: Long? = null,
     @SerializedName("memberships") val memberships: List<MembershipInfo>? = null
 )
 
 data class BoxInfo(
     @SerializedName("id") val id: Long,
-    @SerializedName("name") val name: String?,
-    @SerializedName("address") val address: String?
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("address") val address: String? = null
 )
 
 data class MembershipInfo(
     @SerializedName("id") val id: Long,
-    @SerializedName("box_id") val boxId: Long?,
-    @SerializedName("name") val name: String?,
-    @SerializedName("status") val status: String?,
+    @SerializedName("box_id") val boxId: Long? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("status") val status: String? = null,
     @SerializedName("is_active") val isActive: Boolean? = true
 )
 
@@ -50,7 +73,7 @@ data class MembershipInfo(
 // ==========================================
 
 data class ScheduleResponse(
-    @SerializedName("status") val status: Boolean? = null,
+    @SerializedName("status") val status: Any? = null,
     @SerializedName("data") val data: List<ScheduleDayGroup>? = null,
     @SerializedName("sessions") val sessions: List<SessionDto>? = null
 )
@@ -75,7 +98,7 @@ data class SessionDto(
     @SerializedName("booked_participants") val bookedParticipants: Int? = null,
     @SerializedName("is_booked") val isBooked: Boolean? = false,
     @SerializedName("is_standby") val isStandby: Boolean? = false,
-    @SerializedName("booking_open_date") val bookingOpenDate: String? = null, // e.g. "2026-08-27 18:00:00"
+    @SerializedName("booking_open_date") val bookingOpenDate: String? = null,
     @SerializedName("booking_open_days_before") val bookingOpenDaysBefore: Int? = null,
     @SerializedName("booking_open_hours_before") val bookingOpenHoursBefore: Int? = null
 )
@@ -101,11 +124,12 @@ data class BookingRequest(
 )
 
 data class BookingResponse(
-    @SerializedName("status") val status: Boolean? = null,
+    @SerializedName("status") val status: Any? = null,
     @SerializedName("success") val success: Boolean? = null,
     @SerializedName("message") val message: String? = null,
     @SerializedName("data") val data: Any? = null,
-    @SerializedName("error") val error: String? = null
+    @SerializedName("error") val error: String? = null,
+    @SerializedName("errorCode") val errorCode: Int? = null
 )
 
 // ==========================================
@@ -125,12 +149,12 @@ enum class SnipeStatus {
 data class BookingRule(
     val id: String = UUID.randomUUID().toString(),
     val dayOfWeek: DayOfWeek,
-    val targetTime: LocalTime, // e.g. 18:00
-    val classNamePattern: String = "", // e.g. "CrossFit" or "WOD", empty matches all
+    val targetTime: LocalTime,
+    val classNamePattern: String = "",
     val boxId: Long? = null,
     val enabled: Boolean = true,
     val allowWaitlist: Boolean = true,
-    val leadDaysBefore: Int = 1, // Arbox standard is typically 1 or 2 days before
+    val leadDaysBefore: Int = 1,
     val leadHoursBefore: Int = 24
 )
 
@@ -142,7 +166,7 @@ data class ScheduledSnipe(
     val className: String,
     val classDateTime: String,
     val bookingOpenEpochMs: Long,
-    val alarmEpochMs: Long, // T - 5s
+    val alarmEpochMs: Long,
     val status: SnipeStatus = SnipeStatus.SCHEDULED,
     val lastAttemptEpochMs: Long? = null,
     val logMessage: String? = null
@@ -161,7 +185,7 @@ data class SnipeLog(
 
 data class SnipeSettings(
     val burstParallelRequests: Int = 4,
-    val calibrationOffsetMs: Long = -50L, // Dispatch 50ms before T0 to compensate network RTT
-    val refreshPreCheckSeconds: Int = 3, // T - 3s session refresh check
+    val calibrationOffsetMs: Long = -50L,
+    val refreshPreCheckSeconds: Int = 3,
     val autoSyncScheduleHours: Int = 12
 )
