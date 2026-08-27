@@ -225,7 +225,7 @@ private fun RuleItemCard(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = String.format("%02d:%02d", rule.targetTime.hour, rule.targetTime.minute),
+                        text = String.format(Locale.US, "%02d:%02d", rule.targetTime.hour, rule.targetTime.minute),
                         style = MaterialTheme.typography.titleLarge,
                         color = if (rule.enabled) TextPrimary else TextMuted,
                         fontWeight = FontWeight.Bold
@@ -338,7 +338,7 @@ private fun AddRuleDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedTextField(
-                        value = String.format("%02d", hour),
+                        value = String.format(Locale.US, "%02d", hour),
                         onValueChange = { hour = it.toIntOrNull()?.coerceIn(0, 23) ?: hour },
                         label = { Text("Hour") },
                         modifier = Modifier.weight(1f),
@@ -351,7 +351,7 @@ private fun AddRuleDialog(
                         shape = RoundedCornerShape(8.dp)
                     )
                     OutlinedTextField(
-                        value = String.format("%02d", minute),
+                        value = String.format(Locale.US, "%02d", minute),
                         onValueChange = { minute = it.toIntOrNull()?.coerceIn(0, 59) ?: minute },
                         label = { Text("Min") },
                         modifier = Modifier.weight(1f),
