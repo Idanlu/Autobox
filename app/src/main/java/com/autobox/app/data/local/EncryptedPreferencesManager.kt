@@ -35,6 +35,10 @@ class EncryptedPreferencesManager(context: Context) {
         get() = sharedPreferences.getString(KEY_AUTH_TOKEN, null)
         set(value) = sharedPreferences.edit().putString(KEY_AUTH_TOKEN, value).apply()
 
+    var refreshToken: String?
+        get() = sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
+        set(value) = sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, value).apply()
+
     var userId: Long
         get() = sharedPreferences.getLong(KEY_USER_ID, -1L)
         set(value) = sharedPreferences.edit().putLong(KEY_USER_ID, value).apply()
@@ -62,6 +66,7 @@ class EncryptedPreferencesManager(context: Context) {
     fun clearAuth() {
         sharedPreferences.edit()
             .remove(KEY_AUTH_TOKEN)
+            .remove(KEY_REFRESH_TOKEN)
             .remove(KEY_USER_ID)
             .remove(KEY_USER_NAME)
             .remove(KEY_MEMBERSHIP_ID)
@@ -89,6 +94,7 @@ class EncryptedPreferencesManager(context: Context) {
         private const val KEY_EMAIL = "key_email"
         private const val KEY_PASSWORD = "key_password"
         private const val KEY_AUTH_TOKEN = "key_auth_token"
+        private const val KEY_REFRESH_TOKEN = "key_refresh_token"
         private const val KEY_USER_ID = "key_user_id"
         private const val KEY_USER_NAME = "key_user_name"
         private const val KEY_BOX_ID = "key_box_id"

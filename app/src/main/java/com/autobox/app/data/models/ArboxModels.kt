@@ -11,7 +11,6 @@ import java.util.UUID
 
 data class LoginRequest(
     @SerializedName("email") val email: String,
-    @SerializedName("username") val username: String? = null,
     @SerializedName("password") val password: String
 )
 
@@ -32,6 +31,7 @@ data class UserData(
     @SerializedName("id") val id: Long? = null,
     @SerializedName("user_id") val userId: Long? = null,
     @SerializedName("token") val token: String? = null,
+    @SerializedName("refreshToken") val refreshToken: String? = null,
     @SerializedName("jwt") val jwt: String? = null,
     @SerializedName("access_token") val accessToken: String? = null,
     @SerializedName("name") val name: String? = null,

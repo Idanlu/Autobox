@@ -18,7 +18,7 @@ class ArboxAuthRepository(
     suspend fun login(email: String, password: String): Result<LoginResponse> = withContext(Dispatchers.IO) {
         val cleanEmail = email.trim()
         try {
-            val response = apiService.login(LoginRequest(email = cleanEmail, username = cleanEmail, password = password))
+            val response = apiService.login(LoginRequest(email = cleanEmail, password = password))
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 val token = body.token
@@ -47,6 +47,9 @@ class ArboxAuthRepository(
                     userId?.let { prefs.userId = it }
                     if (!userName.isNullOrBlank()) prefs.userName = userName
                     boxId?.let { prefs.boxId = it }
+
+                    // Store refresh token if provided
+                    user?.refreshToken?.let { prefs.refreshToken = it }
 
                     activeMembership?.let { membership ->
                         prefs.membershipId = membership.id

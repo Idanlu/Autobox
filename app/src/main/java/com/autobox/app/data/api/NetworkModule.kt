@@ -9,14 +9,18 @@ import java.util.concurrent.TimeUnit
 
 object NetworkModule {
 
-    private const val BASE_URL = "https://api.arboxapp.com/"
+    private const val BASE_URL = "https://apiappv2.arboxapp.com/"
 
     private val headerInterceptor = Interceptor { chain ->
         val original = chain.request()
         val requestBuilder = original.newBuilder()
             .header("Accept", "application/json, text/plain, */*")
+            .header("Accept-Encoding", "gzip")
             .header("Content-Type", "application/json")
-            .header("User-Agent", "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36")
+            .header("User-Agent", "okhttp/4.9.2")
+            .header("referername", "app")
+            .header("version", "11")
+            .header("whitelabel", "Arbox")
         val request = requestBuilder.build()
         chain.proceed(request)
     }
