@@ -62,31 +62,12 @@ class ArboxBookingRepository(
         }
 
         // -------------------------------------------------------------
-        // Phase 1: Wait until T - 3s and verify session
+        // Phase 1: Wait until T - 3s
         // -------------------------------------------------------------
         val tMinus3sEpoch = targetOpenEpochMs - (settings.refreshPreCheckSeconds * 1000L)
         val preCheckDelay = tMinus3sEpoch - System.currentTimeMillis()
         if (preCheckDelay > 0) {
             delay(preCheckDelay)
-        }
-
-        // T - 3s Fresh Pre-check
-        try {
-            val freshSession = scheduleRepo.getFreshSession(sessionId)
-            if (freshSession != null && freshSession.isBooked == true) {
-                val log = SnipeLog(
-                    sessionId = sessionId,
-                    className = className,
-                    durationMs = System.currentTimeMillis() - startTime,
-                    status = SnipeStatus.SUCCESS,
-                    message = "Session is already booked!"
-                )
-                logsRepo.addLog(log)
-                logsRepo.removeScheduledSnipe(sessionId)
-                return@withContext SnipeExecutionResult.Success(log.message, log.durationMs)
-            }
-        } catch (_: Exception) {
-            // Ignore pre-check failure and continue to snipe
         }
 
         // -------------------------------------------------------------

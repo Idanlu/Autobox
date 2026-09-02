@@ -133,13 +133,4 @@ class ArboxScheduleRepository(
         matchingResults
     }
 
-    suspend fun getFreshSession(sessionId: Long): SessionDto? = withContext(Dispatchers.IO) {
-        val token = authRepo.getBearerToken() ?: return@withContext null
-        try {
-            val resp = apiService.getSessionDetails(token, sessionId)
-            if (resp.isSuccessful) resp.body() else null
-        } catch (e: Exception) {
-            null
-        }
-    }
 }
