@@ -227,7 +227,7 @@ class ArboxAuthRepository(
 
     fun getBearerToken(): String? {
         val token = prefs.authToken ?: return null
-        return if (token.startsWith("Bearer ", ignoreCase = true)) token else "Bearer $token"
+        return token
     }
 
     fun getMembershipId(): Long {
