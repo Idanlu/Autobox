@@ -69,6 +69,94 @@ data class MembershipInfo(
 )
 
 // ==========================================
+// User Profile Models (api/v2/user/profile)
+// ==========================================
+
+data class UserProfileResponse(
+    @SerializedName("data") val data: UserProfileData? = null
+)
+
+data class UserProfileData(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("email") val email: String? = null,
+    @SerializedName("first_name") val firstName: String? = null,
+    @SerializedName("last_name") val lastName: String? = null,
+    @SerializedName("full_name") val fullName: String? = null,
+    @SerializedName("boxes") val boxes: List<Long>? = null,
+    @SerializedName("activeBoxes") val activeBoxes: List<Long>? = null,
+    @SerializedName("activeLocationsBox") val activeLocationsBox: List<Long>? = null,
+    @SerializedName("inactiveBoxes") val inactiveBoxes: List<Long>? = null,
+    @SerializedName("allBoxes") val allBoxes: List<Long>? = null,
+    @SerializedName("locations") val locations: List<Long>? = null,
+    @SerializedName("refreshToken") val refreshToken: String? = null,
+    @SerializedName("users_boxes") val usersBoxes: List<UserBoxDto>? = null,
+    @SerializedName("lastEndedMembership") val lastEndedMembership: LastEndedMembershipDto? = null
+)
+
+data class UserBoxDto(
+    @SerializedName("ub_id") val ubId: Long? = null,
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("user_fk") val userFk: Long? = null,
+    @SerializedName("box_fk") val boxFk: Long? = null,
+    @SerializedName("locations_box_fk") val locationsBoxFk: Long? = null,
+    @SerializedName("active") val active: Int? = null,
+    @SerializedName("first_name") val firstName: String? = null,
+    @SerializedName("last_name") val lastName: String? = null,
+    @SerializedName("full_name") val fullName: String? = null,
+    @SerializedName("box") val box: ProfileBoxDto? = null,
+    @SerializedName("locations_box") val locationsBox: ProfileLocationBoxDto? = null,
+    @SerializedName("group_connection") val groupConnection: GroupConnectionDto? = null
+)
+
+data class ProfileBoxDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("phone") val phone: String? = null,
+    @SerializedName("email") val email: String? = null,
+    @SerializedName("address") val address: String? = null,
+    @SerializedName("city") val city: String? = null
+)
+
+data class ProfileLocationBoxDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("timezone") val timezone: String? = null
+)
+
+data class GroupConnectionDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("box_fk") val boxFk: Long? = null,
+    @SerializedName("group_members") val groupMembers: List<GroupMemberDto>? = null
+)
+
+data class GroupMemberDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("user_fk") val userFk: Long? = null,
+    @SerializedName("first_name") val firstName: String? = null,
+    @SerializedName("last_name") val lastName: String? = null,
+    @SerializedName("full_name") val fullName: String? = null,
+    @SerializedName("active") val active: Int? = null,
+    @SerializedName("locations_box_fk") val locationsBoxFk: Long? = null,
+    @SerializedName("memberships") val memberships: List<ProfileMembershipDto>? = null
+)
+
+data class ProfileMembershipDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("mu_id") val muId: Long? = null,
+    @SerializedName("user_fk") val userFk: Long? = null,
+    @SerializedName("box_fk") val boxFk: Long? = null,
+    @SerializedName("active") val active: Int? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("start") val start: String? = null,
+    @SerializedName("end") val end: String? = null
+)
+
+data class LastEndedMembershipDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("box_fk") val boxFk: Long? = null
+)
+
+// ==========================================
 // Schedule Models
 // ==========================================
 

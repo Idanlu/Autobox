@@ -34,27 +34,32 @@ class ArboxAuthRepository(
                     prefs.password = password
                     prefs.authToken = token
 
-                    val user = body.data
-                    val nestedUser = user?.user
-                    val userId = user?.id ?: user?.userId ?: nestedUser?.id
-                    val userName = user?.name ?: "${user?.firstName ?: ""} ${user?.lastName ?: ""}".trim().ifBlank { nestedUser?.name }
-                    val boxId = user?.boxId ?: user?.boxes?.firstOrNull()?.id ?: nestedUser?.boxId
+                    // Step 1: Attempt to retrieve full user profile via api/v2/user/profile
+                    val profileResult = fetchUserProfile(token)
 
-                    val memberships = user?.memberships ?: nestedUser?.memberships
-                    val activeMembership = memberships?.firstOrNull { it.isActive != false }
-                        ?: memberships?.firstOrNull()
+                    // Step 2: If profile API fails or returns incomplete info, fallback to login response payload
+                    if (profileResult.isFailure || prefs.boxId <= 0) {
+                        val user = body.data
+                        val nestedUser = user?.user
+                        val userId = user?.id ?: user?.userId ?: nestedUser?.id
+                        val userName = user?.name ?: "${user?.firstName ?: ""} ${user?.lastName ?: ""}".trim().ifBlank { nestedUser?.name }
+                        val boxId = user?.boxId ?: user?.boxes?.firstOrNull()?.id ?: nestedUser?.boxId
 
-                    userId?.let { prefs.userId = it }
-                    if (!userName.isNullOrBlank()) prefs.userName = userName
-                    boxId?.let { prefs.boxId = it }
+                        val memberships = user?.memberships ?: nestedUser?.memberships
+                        val activeMembership = memberships?.firstOrNull { it.isActive != false }
+                            ?: memberships?.firstOrNull()
 
-                    // Store refresh token if provided
-                    user?.refreshToken?.let { prefs.refreshToken = it }
+                        userId?.let { prefs.userId = it }
+                        if (!userName.isNullOrBlank()) prefs.userName = userName
+                        boxId?.let { prefs.boxId = it }
 
-                    activeMembership?.let { membership ->
-                        prefs.membershipId = membership.id
-                        membership.name?.let { prefs.membershipName = it }
-                        membership.boxId?.let { prefs.boxId = it }
+                        user?.refreshToken?.let { prefs.refreshToken = it }
+
+                        activeMembership?.let { membership ->
+                            prefs.membershipId = membership.id
+                            membership.name?.let { prefs.membershipName = it }
+                            membership.boxId?.let { prefs.boxId = it }
+                        }
                     }
 
                     Result.success(body)
@@ -73,16 +78,107 @@ class ArboxAuthRepository(
         }
     }
 
+    /**
+     * Retrieves user profile from api/v2/user/profile and extracts box_id, location_id,
+     * memberships, user info, and refresh token.
+     */
+    suspend fun fetchUserProfile(explicitToken: String? = null): Result<com.autobox.app.data.models.UserProfileData> = withContext(Dispatchers.IO) {
+        val rawToken = explicitToken ?: prefs.authToken ?: return@withContext Result.failure(
+            IllegalStateException("No authentication token available.")
+        )
+        val bearerToken = if (rawToken.startsWith("Bearer ", ignoreCase = true)) rawToken else "Bearer $rawToken"
+
+        try {
+            val response = apiService.getUserProfile(bearerToken)
+            if (response.isSuccessful && response.body()?.data != null) {
+                val profile = response.body()!!.data!!
+                applyProfileData(profile)
+                Result.success(profile)
+            } else {
+                val code = response.code()
+                val err = response.errorBody()?.string()
+                Result.failure(Exception("Failed to fetch profile: HTTP $code ${err ?: ""}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun applyProfileData(profile: com.autobox.app.data.models.UserProfileData) {
+        // User identity
+        profile.id?.let { prefs.userId = it }
+        val displayName = profile.fullName?.takeIf { it.isNotBlank() }
+            ?: "${profile.firstName ?: ""} ${profile.lastName ?: ""}".trim().takeIf { it.isNotBlank() }
+        displayName?.let { prefs.userName = it }
+        profile.email?.takeIf { it.isNotBlank() }?.let { prefs.email = it }
+        profile.refreshToken?.takeIf { it.isNotBlank() }?.let { prefs.refreshToken = it }
+
+        // Find active user box
+        val usersBoxes = profile.usersBoxes ?: emptyList()
+        val activeUserBox = usersBoxes.firstOrNull { it.active == 1 }
+            ?: usersBoxes.firstOrNull()
+
+        // Extract Box ID:
+        // 1. From active users_boxes (box_fk or box.id)
+        // 2. From activeBoxes list
+        // 3. From boxes or allBoxes list
+        val extractedBoxId = activeUserBox?.boxFk
+            ?: activeUserBox?.box?.id
+            ?: profile.activeBoxes?.firstOrNull()
+            ?: profile.boxes?.firstOrNull()
+            ?: profile.allBoxes?.firstOrNull()
+
+        extractedBoxId?.let { prefs.boxId = it }
+
+        // Extract Location ID:
+        // 1. From active users_boxes (locations_box_fk or locations_box.id)
+        // 2. From activeLocationsBox list
+        // 3. From locations list
+        val extractedLocationId = activeUserBox?.locationsBoxFk
+            ?: activeUserBox?.locationsBox?.id
+            ?: profile.activeLocationsBox?.firstOrNull()
+            ?: profile.locations?.firstOrNull()
+
+        extractedLocationId?.let { prefs.locationId = it }
+
+        // Box Name
+        val gymName = activeUserBox?.box?.name?.takeIf { it.isNotBlank() }
+        gymName?.let { prefs.boxName = it }
+
+        // Extract Membership:
+        // Look inside group_connection -> group_members for the user's active membership
+        val groupMembers = activeUserBox?.groupConnection?.groupMembers ?: emptyList()
+        val profileUserId = profile.id
+        val targetMember = groupMembers.firstOrNull { it.userFk == profileUserId }
+            ?: groupMembers.firstOrNull { it.active == 1 }
+            ?: groupMembers.firstOrNull()
+
+        val memberMemberships = targetMember?.memberships ?: emptyList()
+        val activeMembership = memberMemberships.firstOrNull { it.active == 1 }
+            ?: memberMemberships.firstOrNull()
+
+        val membershipId = activeMembership?.muId
+            ?: activeMembership?.id
+            ?: activeUserBox?.ubId
+            ?: activeUserBox?.id
+            ?: profile.lastEndedMembership?.id
+
+        membershipId?.let { prefs.membershipId = it }
+        activeMembership?.name?.let { prefs.membershipName = it }
+    }
+
     fun saveDirectSession(
         token: String,
         boxId: Long,
         membershipId: Long,
+        locationId: Long = boxId,
         email: String = "",
         userName: String = "Direct Session"
     ) {
         val cleanToken = token.trim().removePrefix("Bearer ").removePrefix("bearer ")
         prefs.authToken = cleanToken
         prefs.boxId = boxId
+        prefs.locationId = locationId
         prefs.membershipId = membershipId
         prefs.email = email
         prefs.userName = userName
@@ -97,7 +193,11 @@ class ArboxAuthRepository(
             result.isSuccess
         } else {
             // If using direct token without password, verify token is present
-            !prefs.authToken.isNullOrBlank()
+            val hasToken = !prefs.authToken.isNullOrBlank()
+            if (hasToken && (prefs.boxId <= 0 || prefs.locationId <= 0)) {
+                fetchUserProfile()
+            }
+            hasToken
         }
     }
 
@@ -136,6 +236,14 @@ class ArboxAuthRepository(
 
     fun getBoxId(): Long {
         return prefs.boxId
+    }
+
+    fun getLocationId(): Long {
+        return prefs.locationId
+    }
+
+    fun getBoxName(): String? {
+        return prefs.boxName
     }
 
     fun isLoggedIn(): Boolean {

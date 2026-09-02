@@ -138,8 +138,9 @@ fun AuthScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     ProfileRow(label = "User", value = state.userName ?: state.email.ifBlank { "Connected Member" })
+                    ProfileRow(label = "Gym Box", value = if (!state.boxName.isNullOrBlank()) "${state.boxName} (${state.boxId})" else state.boxId.toString())
+                    ProfileRow(label = "Location Box ID", value = if (state.locationId > 0) state.locationId.toString() else "Default")
                     ProfileRow(label = "Membership", value = state.membershipName ?: "Active (ID: ${state.membershipId})")
-                    ProfileRow(label = "Gym Box ID", value = state.boxId.toString())
 
                     Spacer(modifier = Modifier.height(20.dp))
 

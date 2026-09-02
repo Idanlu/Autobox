@@ -19,6 +19,8 @@ data class AuthUiState(
     val membershipName: String? = null,
     val membershipId: Long = -1L,
     val boxId: Long = -1L,
+    val locationId: Long = -1L,
+    val boxName: String? = null,
     val errorMessage: String? = null
 )
 
@@ -34,7 +36,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             userName = prefs.userName,
             membershipName = prefs.membershipName,
             membershipId = prefs.membershipId,
-            boxId = prefs.boxId
+            boxId = prefs.boxId,
+            locationId = prefs.locationId,
+            boxName = prefs.boxName
         )
     )
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -57,6 +61,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     membershipName = prefs.membershipName,
                     membershipId = prefs.membershipId,
                     boxId = prefs.boxId,
+                    locationId = prefs.locationId,
+                    boxName = prefs.boxName,
                     errorMessage = null
                 )
             } else {

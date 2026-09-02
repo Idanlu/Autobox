@@ -20,6 +20,7 @@ class ArboxScheduleRepository(
 
     suspend fun fetchUpcomingSchedule(
         boxId: Long = authRepo.getBoxId(),
+        locationId: Long = authRepo.getLocationId(),
         daysAhead: Long = 7
     ): Result<List<SessionDto>> = withContext(Dispatchers.IO) {
         val token = authRepo.getBearerToken() ?: return@withContext Result.failure(
@@ -27,11 +28,12 @@ class ArboxScheduleRepository(
         )
 
         val (fromDate, toDate) = DateTimeUtils.getScheduleDateRangeStr(daysAhead)
+        val effectiveLocationId = if (locationId > 0) locationId else boxId
         val request = com.autobox.app.data.models.ScheduleRequest(
             from = fromDate,
             to = toDate,
             boxesId = boxId,
-            locationsBoxId = boxId
+            locationsBoxId = effectiveLocationId
         )
 
         try {

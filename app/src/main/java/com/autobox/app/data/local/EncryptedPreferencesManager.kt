@@ -51,6 +51,14 @@ class EncryptedPreferencesManager(context: Context) {
         get() = sharedPreferences.getLong(KEY_BOX_ID, -1L)
         set(value) = sharedPreferences.edit().putLong(KEY_BOX_ID, value).apply()
 
+    var locationId: Long
+        get() = sharedPreferences.getLong(KEY_LOCATION_ID, -1L)
+        set(value) = sharedPreferences.edit().putLong(KEY_LOCATION_ID, value).apply()
+
+    var boxName: String?
+        get() = sharedPreferences.getString(KEY_BOX_NAME, null)
+        set(value) = sharedPreferences.edit().putString(KEY_BOX_NAME, value).apply()
+
     var membershipId: Long
         get() = sharedPreferences.getLong(KEY_MEMBERSHIP_ID, -1L)
         set(value) = sharedPreferences.edit().putLong(KEY_MEMBERSHIP_ID, value).apply()
@@ -60,7 +68,7 @@ class EncryptedPreferencesManager(context: Context) {
         set(value) = sharedPreferences.edit().putString(KEY_MEMBERSHIP_NAME, value).apply()
 
     fun isLoggedIn(): Boolean {
-        return !authToken.isNullOrBlank() && membershipId > 0
+        return !authToken.isNullOrBlank() && (membershipId > 0 || boxId > 0)
     }
 
     fun clearAuth() {
@@ -72,6 +80,8 @@ class EncryptedPreferencesManager(context: Context) {
             .remove(KEY_MEMBERSHIP_ID)
             .remove(KEY_MEMBERSHIP_NAME)
             .remove(KEY_BOX_ID)
+            .remove(KEY_LOCATION_ID)
+            .remove(KEY_BOX_NAME)
             .apply()
     }
 
@@ -98,6 +108,8 @@ class EncryptedPreferencesManager(context: Context) {
         private const val KEY_USER_ID = "key_user_id"
         private const val KEY_USER_NAME = "key_user_name"
         private const val KEY_BOX_ID = "key_box_id"
+        private const val KEY_LOCATION_ID = "key_location_id"
+        private const val KEY_BOX_NAME = "key_box_name"
         private const val KEY_MEMBERSHIP_ID = "key_membership_id"
         private const val KEY_MEMBERSHIP_NAME = "key_membership_name"
         private const val KEY_SNIPE_SETTINGS = "key_snipe_settings"

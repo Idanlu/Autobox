@@ -21,6 +21,11 @@ interface ArboxApiService {
         @Body request: LoginRequest
     ): Response<LoginResponse>
 
+    @GET("api/v2/user/profile")
+    suspend fun getUserProfile(
+        @Header("Authorization") bearerToken: String
+    ): Response<com.autobox.app.data.models.UserProfileResponse>
+
     @POST("api/v2/schedule/betweenDates")
     suspend fun getSchedule(
         @Header("Authorization") bearerToken: String,
