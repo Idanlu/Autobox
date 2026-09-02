@@ -86,7 +86,7 @@ class ArboxAuthRepository(
         val rawToken = explicitToken ?: prefs.authToken ?: return@withContext Result.failure(
             IllegalStateException("No authentication token available.")
         )
-        val bearerToken = if (rawToken.startsWith("Bearer ", ignoreCase = true)) rawToken else "Bearer $rawToken"
+        val bearerToken = rawToken
 
         try {
             val response = apiService.getUserProfile(bearerToken)

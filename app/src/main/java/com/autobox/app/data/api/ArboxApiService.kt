@@ -23,24 +23,24 @@ interface ArboxApiService {
 
     @GET("api/v2/user/profile")
     suspend fun getUserProfile(
-        @Header("Authorization") bearerToken: String
+        @Header("accesstoken") bearerToken: String
     ): Response<com.autobox.app.data.models.UserProfileResponse>
 
     @POST("api/v2/schedule/betweenDates")
     suspend fun getSchedule(
-        @Header("Authorization") bearerToken: String,
+        @Header("accesstoken") bearerToken: String,
         @Body request: com.autobox.app.data.models.ScheduleRequest
     ): Response<ScheduleResponse>
 
     @GET("api/v2/schedule/session/{sessionId}")
     suspend fun getSessionDetails(
-        @Header("Authorization") bearerToken: String,
+        @Header("accesstoken") bearerToken: String,
         @Path("sessionId") sessionId: Long
     ): Response<SessionDto>
 
     @POST("api/v2/user/memberships/{membership_id}/book")
     suspend fun bookSession(
-        @Header("Authorization") bearerToken: String,
+        @Header("accesstoken") bearerToken: String,
         @Path("membership_id") membershipId: Long,
         @Body request: BookingRequest
     ): Response<BookingResponse>
