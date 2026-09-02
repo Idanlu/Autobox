@@ -72,6 +72,13 @@ data class MembershipInfo(
 // Schedule Models
 // ==========================================
 
+data class ScheduleRequest(
+    @SerializedName("from") val from: String,
+    @SerializedName("to") val to: String,
+    @SerializedName("boxes_id") val boxesId: Long,
+    @SerializedName("locations_box_id") val locationsBoxId: Long
+)
+
 data class ScheduleResponse(
     @SerializedName("status") val status: Any? = null,
     @SerializedName("data") val data: List<ScheduleDayGroup>? = null,

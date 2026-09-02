@@ -26,11 +26,16 @@ class ArboxScheduleRepository(
             IllegalStateException("User is not authenticated. Please log in first.")
         )
 
-        val startDate = DateTimeUtils.getTodayString()
-        val endDate = DateTimeUtils.getFutureDateString(daysAhead)
+        val (fromDate, toDate) = DateTimeUtils.getScheduleDateRangeStr(daysAhead)
+        val request = com.autobox.app.data.models.ScheduleRequest(
+            from = fromDate,
+            to = toDate,
+            boxesId = boxId,
+            locationsBoxId = boxId
+        )
 
         try {
-            val response = apiService.getSchedule(token, boxId, startDate, endDate)
+            val response = apiService.getSchedule(token, request)
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 val allSessions = mutableListOf<SessionDto>()
@@ -49,7 +54,7 @@ class ArboxScheduleRepository(
                 val refreshed = authRepo.reAuthenticateIfNeeded()
                 if (refreshed) {
                     val freshToken = authRepo.getBearerToken() ?: return@withContext Result.failure(Exception("Re-auth failed"))
-                    val retryResp = apiService.getSchedule(freshToken, boxId, startDate, endDate)
+                    val retryResp = apiService.getSchedule(freshToken, request)
                     if (retryResp.isSuccessful && retryResp.body() != null) {
                         val body = retryResp.body()!!
                         val list = mutableListOf<SessionDto>()

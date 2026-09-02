@@ -21,12 +21,10 @@ interface ArboxApiService {
         @Body request: LoginRequest
     ): Response<LoginResponse>
 
-    @GET("api/v2/schedule")
+    @POST("api/v2/schedule/betweenDates")
     suspend fun getSchedule(
         @Header("Authorization") bearerToken: String,
-        @Query("box_id") boxId: Long,
-        @Query("startDate") startDate: String,
-        @Query("endDate") endDate: String
+        @Body request: com.autobox.app.data.models.ScheduleRequest
     ): Response<ScheduleResponse>
 
     @GET("api/v2/schedule/session/{sessionId}")

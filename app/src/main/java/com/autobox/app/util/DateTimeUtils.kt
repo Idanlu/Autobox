@@ -164,4 +164,18 @@ object DateTimeUtils {
     fun getFutureDateString(daysAhead: Long): String {
         return LocalDate.now().plusDays(daysAhead).format(DATE_FORMATTER)
     }
+
+    fun getScheduleDateRangeStr(daysAhead: Long): Pair<String, String> {
+        val now = LocalDate.now()
+        val future = now.plusDays(daysAhead)
+        val zone = ZoneId.systemDefault()
+        
+        val fromLdt = now.atStartOfDay()
+        val toLdt = future.atTime(LocalTime.MAX)
+
+        val fromStr = fromLdt.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        val toStr = toLdt.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
+        return Pair(fromStr, toStr)
+    }
 }
