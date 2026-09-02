@@ -15,7 +15,6 @@ object NetworkModule {
         val original = chain.request()
         val requestBuilder = original.newBuilder()
             .header("Accept", "application/json, text/plain, */*")
-            .header("Accept-Encoding", "gzip")
             .header("Content-Type", "application/json")
             .header("User-Agent", "okhttp/4.9.2")
             .header("referername", "app")
