@@ -178,8 +178,8 @@ class ArboxBookingRepository(
         standby: Boolean
     ): BookingAttemptResult {
         return try {
-            val request = BookingRequest(sessionId = sessionId, standby = standby)
-            val response: Response<BookingResponse> = snipeApi.bookSession(token, membershipId, request)
+            val request = BookingRequest(scheduleId = sessionId, membershipUserId = membershipId)
+            val response: Response<BookingResponse> = snipeApi.bookSession(token, request)
             if (response.isSuccessful && response.body() != null) {
                 val body = response.body()!!
                 if (body.status != false && body.error == null) {

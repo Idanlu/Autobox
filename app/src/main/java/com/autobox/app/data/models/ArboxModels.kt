@@ -1,6 +1,7 @@
 package com.autobox.app.data.models
 
 import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 import com.google.gson.annotations.SerializedName
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -382,8 +383,9 @@ data class SpaceDto(
 // ==========================================
 
 data class BookingRequest(
-    @SerializedName("session_id") val sessionId: Long,
-    @SerializedName("standby") val standby: Boolean = false
+    @SerializedName("schedule_id") val scheduleId: Long,
+    @SerializedName("membership_user_id") val membershipUserId: Long,
+    @SerializedName("extras") val extras: JsonElement = JsonNull.INSTANCE
 )
 
 data class BookingResponse(

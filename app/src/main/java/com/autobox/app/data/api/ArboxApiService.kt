@@ -39,10 +39,9 @@ interface ArboxApiService {
         @Path("sessionId") sessionId: Long
     ): Response<SessionDto>
 
-    @POST("api/v2/user/memberships/{membership_id}/book")
+    @POST("api/v2/scheduleUser/insert")
     suspend fun bookSession(
         @Header("accesstoken") bearerToken: String,
-        @Path("membership_id") membershipId: Long,
         @Body request: BookingRequest
     ): Response<BookingResponse>
 }
