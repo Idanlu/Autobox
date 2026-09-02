@@ -180,23 +180,63 @@ data class ScheduleDayGroup(
 
 data class SessionDto(
     @SerializedName("id") val id: Long,
-    @SerializedName("schedule_id") val scheduleId: Long? = null,
-    @SerializedName("box_id") val boxId: Long? = null,
-    @SerializedName("name") val name: String? = null,
-    @SerializedName("description") val description: String? = null,
-    @SerializedName("category") val category: CategoryDto? = null,
+    @SerializedName("time") val time: String? = null,
+    @SerializedName("end_time") val endTime: String? = null,
+    @SerializedName("date") val date: String? = null,
+    @SerializedName("second_coach_fk") val secondCoachFk: Long? = null,
+    @SerializedName("coach_fk") val coachFk: Long? = null,
+    @SerializedName("box_category_fk") val boxCategoryFk: Long? = null,
+    @SerializedName("locations_box_fk") val locationsBoxFk: Long? = null,
+    @SerializedName("box_fk") val boxFk: Long? = null,
+    @SerializedName("max_users") val maxUsers: Int? = null,
+    @SerializedName("series_fk") val seriesFk: Long? = null,
+    @SerializedName("live_link") val liveLink: String? = null,
+    @SerializedName("has_spots") val hasSpots: Int? = null,
+    @SerializedName("availability_id") val availabilityId: Long? = null,
+    @SerializedName("disable_cancellation_time") val disableCancellationTime: Int? = null,
+    @SerializedName("enable_late_cancellation") val enableLateCancellation: Int? = null,
+    @SerializedName("enable_registration_time") val enableRegistrationTime: Int? = null,
+    @SerializedName("status") val status: String? = null,
+    @SerializedName("spaces_id") val spacesId: Long? = null,
+    @SerializedName("workout_id") val workoutId: Long? = null,
+    @SerializedName("late_cancellation") val lateCancellation: Int? = null,
+    @SerializedName("past") val past: Int? = null,
+    @SerializedName("user_booked") val userBooked: Int? = null,
+    @SerializedName("user_in_standby") val userInStandby: Int? = null,
+    @SerializedName("stand_by_position") val standbyPosition: Int? = null,
+    @SerializedName("booked_users") val bookedUsers: List<BookedUserDto>? = null,
+    @SerializedName("stand_by") val standbyCount: Int? = null,
+    @SerializedName("free") val free: Int? = null,
+    @SerializedName("registered") val registered: Int? = null,
+    @SerializedName("booking_option") val bookingOption: String? = null,
+    @SerializedName("is_swappable_schedule") val isSwappableSchedule: Boolean? = null,
+    @SerializedName("reschedule") val reschedule: Boolean? = null,
+    @SerializedName("day_of_week") val dayOfWeek: Int? = null,
+    @SerializedName("date_time") val dateTime: SessionDateTimeDto? = null,
+    @SerializedName("end_date_time") val endDateTime: SessionDateTimeDto? = null,
+    @SerializedName("box") val box: SessionBoxDto? = null,
+    @SerializedName("box_categories") val boxCategories: BoxCategoryDto? = null,
+    @SerializedName("locations_box") val locationsBox: LocationBoxDto? = null,
+    @SerializedName("series") val series: SessionSeriesDto? = null,
+    @SerializedName("disable_pages_app") val disablePagesApp: List<DisablePageDto>? = null,
+    @SerializedName("spaces") val spaces: SpaceDto? = null,
+    @SerializedName("custom_field_value") val customFieldValue: List<Any>? = null,
+    @SerializedName("schedule_stand_by") val scheduleStandby: List<Any>? = null,
     @SerializedName("coach") val coach: CoachDto? = null,
-    @SerializedName("time") val time: String? = null, // e.g. "18:00:00" or "2026-08-28 18:00:00"
-    @SerializedName("date") val date: String? = null, // e.g. "2026-08-28"
-    @SerializedName("duration") val duration: Int? = null, // in minutes
-    @SerializedName("max_participants") val maxParticipants: Int? = null,
-    @SerializedName("booked_participants") val bookedParticipants: Int? = null,
-    @SerializedName("is_booked") val isBooked: Boolean? = false,
-    @SerializedName("is_standby") val isStandby: Boolean? = false,
-    @SerializedName("booking_open_date") val bookingOpenDate: String? = null,
-    @SerializedName("booking_open_days_before") val bookingOpenDaysBefore: Int? = null,
-    @SerializedName("booking_open_hours_before") val bookingOpenHoursBefore: Int? = null
-)
+    @SerializedName("second_coach") val secondCoach: CoachDto? = null
+) {
+    val boxId: Long? get() = boxFk
+    val name: String? get() = boxCategories?.name
+    val category: CategoryDto? get() = boxCategories?.let { CategoryDto(it.id, it.name, it.categoryColor) }
+    val duration: Int? get() = boxCategories?.length
+    val maxParticipants: Int? get() = maxUsers
+    val bookedParticipants: Int? get() = registered
+    val isBooked: Boolean get() = userBooked == 1
+    val isStandby: Boolean get() = userInStandby == 1
+    val bookingOpenDate: String? get() = null
+    val bookingOpenDaysBefore: Int? get() = null
+    val bookingOpenHoursBefore: Int? get() = enableRegistrationTime
+}
 
 data class CategoryDto(
     @SerializedName("id") val id: Long? = null,
@@ -204,9 +244,136 @@ data class CategoryDto(
     @SerializedName("color") val color: String? = null
 )
 
+data class BookedUserDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("schedule_user_id") val scheduleUserId: Long? = null,
+    @SerializedName("late_cancellation") val lateCancellation: Int? = null,
+    @SerializedName("spot") val spot: Int? = null,
+    @SerializedName("membership_user_fk") val membershipUserFk: Long? = null,
+    @SerializedName("checked_in") val checkedIn: Int? = null,
+    @SerializedName("laravel_through_key") val laravelThroughKey: Long? = null,
+    @SerializedName("is_user") val isUser: Boolean? = null
+)
+
+data class SessionDateTimeDto(
+    @SerializedName("date") val date: String? = null,
+    @SerializedName("timezone") val timezone: String? = null
+)
+
+data class SessionBoxDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("has_regular_clients") val hasRegularClients: Int? = null,
+    @SerializedName("cloudinary_image") val cloudinaryImage: String? = null,
+    @SerializedName("phone") val phone: String? = null
+)
+
+data class BoxCategoryDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("bio") val bio: String? = null,
+    @SerializedName("category_color") val categoryColor: String? = null,
+    @SerializedName("length") val length: Int? = null,
+    @SerializedName("price") val price: Double? = null,
+    @SerializedName("type") val type: Int? = null,
+    @SerializedName("trial_limit") val trialLimit: Int? = null,
+    @SerializedName("color_name") val colorName: Boolean? = null,
+    @SerializedName("membership_types") val membershipTypes: List<Any>? = null,
+    @SerializedName("box_categories_groups") val boxCategoriesGroups: List<Any>? = null,
+    @SerializedName("redirect_prop") val redirectProp: Any? = null,
+    @SerializedName("category_type") val categoryType: CategoryTypeDto? = null
+)
+
+data class CategoryTypeDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("updated_at") val updatedAt: String? = null,
+    @SerializedName("deleted_at") val deletedAt: String? = null
+)
+
 data class CoachDto(
     @SerializedName("id") val id: Long? = null,
-    @SerializedName("name") val name: String? = null
+    @SerializedName("bio") val bio: String? = null,
+    @SerializedName("image") val image: String? = null,
+    @SerializedName("user_fk") val userFk: Long? = null,
+    @SerializedName("first_name") val firstName: String? = null,
+    @SerializedName("last_name") val lastName: String? = null,
+    @SerializedName("full_name") val fullName: String? = null,
+    @SerializedName("full_name_shorten") val fullNameShorten: String? = null
+) {
+    val name: String? get() = fullName ?: fullNameShorten
+}
+
+data class LocationBoxDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("location") val location: String? = null,
+    @SerializedName("logo") val logo: String? = null,
+    @SerializedName("date_format") val dateFormat: String? = null,
+    @SerializedName("time_format") val timeFormat: String? = null,
+    @SerializedName("timezone") val timezone: String? = null,
+    @SerializedName("debit_block") val debitBlock: Int? = null,
+    @SerializedName("medical_cert") val medicalCert: Int? = null,
+    @SerializedName("without_waiver") val withoutWaiver: Int? = null,
+    @SerializedName("epidemic_statement") val epidemicStatement: Int? = null,
+    @SerializedName("min_age_block") val minAgeBlock: Int? = null,
+    @SerializedName("gender_block") val genderBlock: Int? = null,
+    @SerializedName("address") val address: String? = null,
+    @SerializedName("currency_symbol") val currencySymbol: String? = null,
+    @SerializedName("has_shop") val hasShop: Boolean? = null
+)
+
+data class SessionSeriesDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("series_name") val seriesName: String? = null,
+    @SerializedName("box_fk") val boxFk: Long? = null,
+    @SerializedName("locations_box_fk") val locationsBoxFk: Long? = null,
+    @SerializedName("spaces_id") val spacesId: Long? = null,
+    @SerializedName("season_id") val seasonId: Long? = null,
+    @SerializedName("box_category_fk") val boxCategoryFk: Long? = null,
+    @SerializedName("tracks") val tracks: Int? = null,
+    @SerializedName("start_date") val startDate: String? = null,
+    @SerializedName("end_date") val endDate: String? = null,
+    @SerializedName("start_time") val startTime: String? = null,
+    @SerializedName("end_time") val endTime: String? = null,
+    @SerializedName("price") val price: Double? = null,
+    @SerializedName("status") val status: String? = null,
+    @SerializedName("day") val day: String? = null,
+    @SerializedName("max_users") val maxUsers: Int? = null,
+    @SerializedName("min_users") val minUsers: Int? = null,
+    @SerializedName("coach_fk") val coachFk: Long? = null,
+    @SerializedName("second_coach_fk") val secondCoachFk: Long? = null,
+    @SerializedName("live_link") val liveLink: String? = null,
+    @SerializedName("gender") val gender: String? = null,
+    @SerializedName("min_age") val minAge: Int? = null,
+    @SerializedName("max_age") val maxAge: Int? = null,
+    @SerializedName("enable_registration_time") val enableRegistrationTime: Int? = null,
+    @SerializedName("block_registration_time") val blockRegistrationTime: Int? = null,
+    @SerializedName("disable_cancellation_time") val disableCancellationTime: Int? = null,
+    @SerializedName("enable_late_cancellation") val enableLateCancellation: Int? = null,
+    @SerializedName("transparent") val transparent: Int? = null,
+    @SerializedName("register_group_member") val registerGroupMember: Int? = null,
+    @SerializedName("allow_mid_booking") val allowMidBooking: Int? = null,
+    @SerializedName("custom_field_value") val customFieldValue: List<Any>? = null,
+    @SerializedName("membership_types") val membershipTypes: List<Any>? = null
+)
+
+data class DisablePageDto(
+    @SerializedName("locations_box_id") val locationsBoxId: Long? = null,
+    @SerializedName("area") val area: String? = null,
+    @SerializedName("section_name") val sectionName: String? = null,
+    @SerializedName("laravel_through_key") val laravelThroughKey: Long? = null
+)
+
+data class SpaceDto(
+    @SerializedName("id") val id: Long? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("image") val image: String? = null,
+    @SerializedName("locations_box_id") val locationsBoxId: Long? = null,
+    @SerializedName("boxes_id") val boxesId: Long? = null,
+    @SerializedName("created_at") val createdAt: String? = null,
+    @SerializedName("updated_at") val updatedAt: String? = null,
+    @SerializedName("deleted_at") val deletedAt: String? = null
 )
 
 // ==========================================
