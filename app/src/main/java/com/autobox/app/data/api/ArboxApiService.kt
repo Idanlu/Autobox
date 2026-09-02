@@ -1,5 +1,6 @@
 package com.autobox.app.data.api
 
+import com.google.gson.JsonElement
 import com.autobox.app.data.models.BookingRequest
 import com.autobox.app.data.models.BookingResponse
 import com.autobox.app.data.models.LoginRequest
@@ -30,7 +31,7 @@ interface ArboxApiService {
     suspend fun getSchedule(
         @Header("accesstoken") bearerToken: String,
         @Body request: com.autobox.app.data.models.ScheduleRequest
-    ): Response<ScheduleResponse>
+    ): Response<JsonElement>
 
     @GET("api/v2/schedule/session/{sessionId}")
     suspend fun getSessionDetails(

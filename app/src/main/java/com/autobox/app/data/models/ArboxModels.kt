@@ -1,5 +1,6 @@
 package com.autobox.app.data.models
 
+import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -169,8 +170,8 @@ data class ScheduleRequest(
 
 data class ScheduleResponse(
     @SerializedName("status") val status: Any? = null,
-    @SerializedName("data") val data: List<ScheduleDayGroup>? = null,
-    @SerializedName("sessions") val sessions: List<SessionDto>? = null
+    @SerializedName("data") val data: JsonElement? = null,
+    @SerializedName("sessions") val sessions: JsonElement? = null
 )
 
 data class ScheduleDayGroup(

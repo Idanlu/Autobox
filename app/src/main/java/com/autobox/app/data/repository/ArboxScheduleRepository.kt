@@ -1,5 +1,7 @@
 package com.autobox.app.data.repository
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.autobox.app.data.api.ArboxApiService
 import com.autobox.app.data.local.RulesRepository
 import com.autobox.app.data.local.SnipeLogsRepository
@@ -39,18 +41,7 @@ class ArboxScheduleRepository(
         try {
             val response = apiService.getSchedule(token, request)
             if (response.isSuccessful && response.body() != null) {
-                val body = response.body()!!
-                val allSessions = mutableListOf<SessionDto>()
-
-                // Format 1: sessions directly on response
-                body.sessions?.let { allSessions.addAll(it) }
-
-                // Format 2: grouped by date
-                body.data?.forEach { dayGroup ->
-                    dayGroup.schedule?.let { allSessions.addAll(it) }
-                }
-
-                Result.success(allSessions.distinctBy { it.id })
+                Result.success(extractSessions(response.body()!!))
             } else if (response.code() == 401) {
                 // Token expired - try re-auth
                 val refreshed = authRepo.reAuthenticateIfNeeded()
@@ -58,11 +49,7 @@ class ArboxScheduleRepository(
                     val freshToken = authRepo.getBearerToken() ?: return@withContext Result.failure(Exception("Re-auth failed"))
                     val retryResp = apiService.getSchedule(freshToken, request)
                     if (retryResp.isSuccessful && retryResp.body() != null) {
-                        val body = retryResp.body()!!
-                        val list = mutableListOf<SessionDto>()
-                        body.sessions?.let { list.addAll(it) }
-                        body.data?.forEach { it.schedule?.let { s -> list.addAll(s) } }
-                        Result.success(list.distinctBy { it.id })
+                        Result.success(extractSessions(retryResp.body()!!))
                     } else {
                         Result.failure(Exception("HTTP ${retryResp.code()} after re-auth"))
                     }
@@ -75,6 +62,28 @@ class ArboxScheduleRepository(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun extractSessions(root: JsonElement): List<SessionDto> {
+        val sessions = mutableListOf<SessionDto>()
+
+        fun visit(element: JsonElement) {
+            when {
+                element.isJsonArray -> element.asJsonArray.forEach(::visit)
+                element.isJsonObject -> {
+                    val objectValue = element.asJsonObject
+                    when {
+                        objectValue.has("sessions") -> visit(objectValue.get("sessions"))
+                        objectValue.has("data") -> visit(objectValue.get("data"))
+                        objectValue.has("schedule") -> visit(objectValue.get("schedule"))
+                        objectValue.has("id") -> sessions.add(Gson().fromJson(element, SessionDto::class.java))
+                    }
+                }
+            }
+        }
+
+        visit(root)
+        return sessions.distinctBy { it.id }
     }
 
     /**
