@@ -21,9 +21,9 @@ class SnipeBurstStrategyTest {
 
     @Test
     fun testBookingRequest_creation() {
-        val request = BookingRequest(sessionId = 998877L, standby = true)
-        assertEquals(998877L, request.sessionId)
-        assertTrue(request.standby)
+        val request = BookingRequest(scheduleId = 998877L, membershipUserId = 12345L)
+        assertEquals(998877L, request.scheduleId)
+        assertEquals(12345L, request.membershipUserId)
     }
 
     @Test

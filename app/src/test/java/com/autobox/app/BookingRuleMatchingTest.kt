@@ -1,7 +1,7 @@
 package com.autobox.app
 
 import com.autobox.app.data.models.BookingRule
-import com.autobox.app.data.models.CategoryDto
+import com.autobox.app.data.models.BoxCategoryDto
 import com.autobox.app.data.models.SessionDto
 import com.autobox.app.util.DateTimeUtils
 import org.junit.Assert.assertFalse
@@ -19,8 +19,7 @@ class BookingRuleMatchingTest {
             id = 201,
             date = "2026-08-31", // A Monday
             time = "18:00:00",
-            name = "CrossFit WOD",
-            category = CategoryDto(id = 1, name = "CrossFit")
+            boxCategories = BoxCategoryDto(id = 1, name = "CrossFit WOD")
         )
 
         val rule = BookingRule(
@@ -40,7 +39,7 @@ class BookingRuleMatchingTest {
             id = 202,
             date = "2026-09-01", // Tuesday
             time = "18:00:00",
-            name = "CrossFit WOD"
+            boxCategories = BoxCategoryDto(name = "CrossFit WOD")
         )
 
         val rule = BookingRule(
@@ -60,7 +59,7 @@ class BookingRuleMatchingTest {
             id = 203,
             date = "2026-08-31", // Monday
             time = "07:00:00",
-            name = "CrossFit WOD"
+            boxCategories = BoxCategoryDto(name = "CrossFit WOD")
         )
 
         val rule = BookingRule(
@@ -80,7 +79,7 @@ class BookingRuleMatchingTest {
             id = 204,
             date = "2026-08-31", // Monday
             time = "18:00:00",
-            name = "Reformer Pilates"
+            boxCategories = BoxCategoryDto(name = "Reformer Pilates")
         )
 
         val rule = BookingRule(
@@ -99,7 +98,7 @@ class BookingRuleMatchingTest {
             id = 205,
             date = "2026-08-31",
             time = "18:00:00",
-            name = "CrossFit WOD"
+            boxCategories = BoxCategoryDto(name = "CrossFit WOD")
         )
 
         val rule = BookingRule(

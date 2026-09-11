@@ -4,6 +4,52 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+fun getGitOutput(vararg args: String): String {
+    return try {
+        val process = ProcessBuilder(*args).directory(rootDir).redirectErrorStream(true).start()
+        val text = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+        if (process.exitValue() == 0) text else ""
+    } catch (_: Exception) {
+        ""
+    }
+}
+
+val appVersionName: String = run {
+    if (project.hasProperty("appVersion")) {
+        project.property("appVersion").toString().trim()
+    } else if (project.hasProperty("versionName")) {
+        project.property("versionName").toString().trim()
+    } else if (!System.getenv("APP_VERSION").isNullOrBlank()) {
+        System.getenv("APP_VERSION").trim()
+    } else if (!System.getenv("TAG").isNullOrBlank()) {
+        System.getenv("TAG").trim()
+    } else if (!System.getenv("GITHUB_REF_NAME").isNullOrBlank() && System.getenv("GITHUB_REF_NAME").startsWith("v")) {
+        System.getenv("GITHUB_REF_NAME").trim()
+    } else {
+        val tag = getGitOutput("git", "describe", "--tags", "--abbrev=0")
+        if (tag.isNotEmpty()) tag else "v1.0.0"
+    }
+}
+
+val appVersionCode: Int = run {
+    if (project.hasProperty("appVersionCode")) {
+        project.property("appVersionCode").toString().toIntOrNull()?.let { return@run it }
+    }
+    System.getenv("APP_VERSION_CODE")?.toIntOrNull()?.let { return@run it }
+
+    val match = Regex("""(\d+)\.(\d+)(?:\.(\d+))?""").find(appVersionName)
+    if (match != null) {
+        val major = match.groupValues[1].toIntOrNull() ?: 1
+        val minor = match.groupValues[2].toIntOrNull() ?: 0
+        val patch = match.groupValues.getOrNull(3)?.toIntOrNull() ?: 0
+        major * 10000 + minor * 100 + patch
+    } else {
+        val count = getGitOutput("git", "rev-list", "--count", "HEAD").toIntOrNull()
+        count ?: 1
+    }
+}
+
 android {
     namespace = "com.autobox.app"
     compileSdk = 35
@@ -12,8 +58,8 @@ android {
         applicationId = "com.autobox.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

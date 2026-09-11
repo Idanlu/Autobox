@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.autobox.app.BuildConfig
 import com.autobox.app.ui.components.BatteryOptimizationCard
 import com.autobox.app.ui.components.SectionHeader
 import com.autobox.app.ui.theme.DarkBorder
@@ -254,6 +255,27 @@ fun SettingsScreen(
                     Text("Trigger Immediate Sync Worker")
                 }
             }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // App Version Info
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Autobox ${BuildConfig.VERSION_NAME}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Build ${BuildConfig.VERSION_CODE}",
+                style = MaterialTheme.typography.labelSmall,
+                color = TextMuted
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))

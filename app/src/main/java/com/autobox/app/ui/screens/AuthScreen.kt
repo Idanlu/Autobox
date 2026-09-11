@@ -49,6 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.autobox.app.BuildConfig
 import com.autobox.app.ui.theme.DarkBorder
 import com.autobox.app.ui.theme.DarkSurface
 import com.autobox.app.ui.theme.OrangePrimary
@@ -107,6 +108,13 @@ fun AuthScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary
         )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = BuildConfig.VERSION_NAME,
+            style = MaterialTheme.typography.labelMedium,
+            color = OrangePrimary.copy(alpha = 0.8f),
+            fontWeight = FontWeight.SemiBold
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -141,6 +149,7 @@ fun AuthScreen(
                     ProfileRow(label = "Gym Box", value = if (!state.boxName.isNullOrBlank()) "${state.boxName} (${state.boxId})" else state.boxId.toString())
                     ProfileRow(label = "Location Box ID", value = if (state.locationId > 0) state.locationId.toString() else "Default")
                     ProfileRow(label = "Membership", value = state.membershipName ?: "Active (ID: ${state.membershipId})")
+                    ProfileRow(label = "App Version", value = BuildConfig.VERSION_NAME)
 
                     Spacer(modifier = Modifier.height(20.dp))
 
